@@ -9,6 +9,13 @@ import os
 
 console = Console()
 
+logging.basicConfig(
+    level="INFO",
+    format="%(message)s",
+    handlers=[RichHandler()],
+)
+log = logging.getLogger("rich")
+
 
 def sudo():
     password = getpass.getpass("Introduce la contraseña: ")
@@ -30,40 +37,37 @@ def ejecutar(comandos):
 
 
 def info(text):
-    logging.basicConfig(
-        level="INFO",
-        format="%(message)s",
-        handlers=[RichHandler()],
-    )
-    log = logging.getLogger("rich")
     log.info(f"{text} :rocket:")
 
 
 def warning(text):
-    logging.basicConfig(
-        level="WARNING",
-        format="%(message)s",
-        handlers=[RichHandler()],
-    )
-    log = logging.getLogger("rich")
-    log.info(f"{text} :warning:")
+    log.warning(f"{text} :warning:")
 
 
 def error(text):
-    logging.basicConfig(
-        level="ERROR",
-        format="%(message)s",
-        handlers=[RichHandler()],
-    )
-    log = logging.getLogger("rich")
-    log.info(f"{text} :boom:")
+    log.error(f"{text} :boom:")
 
 
 def progress_bar(comandos):
     with Progress(transient=True) as progress:
-        task = progress.add_task("Actualizando el sistema...", total=None)
+        progress.add_task("Actualizando el sistema...", total=None)
         for cmd in comandos:
             subprocess.run(
-                f"sudo {cmd}", shell=True,
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                f"sudo {cmd}",
+                shell=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
             )
+
+
+def check_folder(name: str) -> bool:
+    if not name.strip():
+        return False
+    if any(char in name for char in ["/", "\\", ":", "*", "?", '"', "<", ">", "|"]):
+        return False
+    if os.path.isdir(name):
+        info("La carpeta ya existe")
+        return True
+    os.mkdir(name)
+    info("Carpeta creada")
+    return True
