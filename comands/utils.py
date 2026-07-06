@@ -2,6 +2,7 @@ import subprocess
 import getpass
 from rich.console import Console
 from rich.logging import RichHandler
+from rich.progress import Progress
 import logging
 import sys
 import os
@@ -35,7 +36,7 @@ def info(text):
         handlers=[RichHandler()],
     )
     log = logging.getLogger("rich")
-    log.info(f"{text} :rocket")
+    log.info(f"{text} :rocket:")
 
 
 def warning(text):
@@ -45,7 +46,7 @@ def warning(text):
         handlers=[RichHandler()],
     )
     log = logging.getLogger("rich")
-    log.info(f"{text} :warning")
+    log.info(f"{text} :warning:")
 
 
 def error(text):
@@ -55,4 +56,14 @@ def error(text):
         handlers=[RichHandler()],
     )
     log = logging.getLogger("rich")
-    log.info(f"{text} :boom")
+    log.info(f"{text} :boom:")
+
+
+def progress_bar(comandos):
+    with Progress(transient=True) as progress:
+        task = progress.add_task("Actualizando el sistema...", total=None)
+        for cmd in comandos:
+            subprocess.run(
+                f"sudo {cmd}", shell=True,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )

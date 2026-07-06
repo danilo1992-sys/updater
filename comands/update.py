@@ -1,8 +1,7 @@
-from rich import console
-from comands.utils import ejecutar, warning, info
+from comands.utils import warning, info, progress_bar
+from comands.distro import paquetes
 import subprocess
 import shutil
-from rich.console import Console
 
 
 def detectar():
@@ -30,23 +29,23 @@ def apt():
         "apt autoremove -y",
         "apt clean",
     ]
-    ejecutar(comands)
+    progress_bar(comands)
 
 
 def pacman():
     comands = [
         "sudo rm -f /var/cache/pacman/pkg/download-*",
         "sudo rm -f /var/lib/pacman/db.lck",
-        "pacman -Syu --noprogressbar",
-        "pacman -Sc --noprogressbar",
+        "pacman -Syu --noconfirm --noprogressbar",
+        "pacman -Sc --noconfirm --noprogressbar",
     ]
-    ejecutar(comands)
+    progress_bar(comands)
 
     orfanos = subprocess.run(
         ["pacman", "-Qtdq"], capture_output=True, text=True
     ).stdout.strip()
     if orfanos:
-        ejecutar(["pacman -Rns $(pacman -Qtdq) --noprogressbar"])
+        progress_bar(["pacman -Rns --noconfirm $(pacman -Qtdq) --noprogressbar"])
 
 
 def dnf():
@@ -55,25 +54,25 @@ def dnf():
         "dnf upgrade -y",
         "dnf autoremove -y",
     ]
-    ejecutar(comands)
+    progress_bar(comands)
 
 
 def zypper():
     comands = [
-        "zypper refresh",
+        "zypper refresh --non-interactive",
         "zypper update -y",
-        "zypper clean",
+        "zypper clean --non-interactive",
     ]
-    ejecutar(comands)
+    progress_bar(comands)
 
 
 def apk():
     comands = [
-        "apk update",
-        "apk upgrade",
+        "apk update --no-interactive",
+        "apk upgrade --no-interactive",
         "apk cache clean",
     ]
-    ejecutar(comands)
+    progress_bar(comands)
 
 
 def brew():
@@ -82,12 +81,12 @@ def brew():
         "brew upgrade",
         "brew cleanup",
     ]
-    ejecutar(comands)
+    progress_bar(comands)
 
 
 def update():
     gestor = detectar()
-
+    paquetes(gestor)
     if gestor == "apt":
         apt()
     elif gestor == "pacman":
